@@ -2,6 +2,4 @@
     <string name="app_name">TapTexter</string>
     <string name="btn_send">Send Text</string>
     <string name="label_recipient">Recipient</string>
-    <string name="abc">abc</string>
-
 </resources>
