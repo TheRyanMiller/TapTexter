@@ -22,35 +22,56 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.rtmillerprojects.taptexter.R;
 
+import java.util.ArrayList;
+
 public class MainActivity extends Activity implements AdapterView.OnItemClickListener{
 
     private static final int MY_PERMISSIONS_REQUEST_SEND_SMS = 1;
     private static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 2;
-    ListView l;
-    String[] dataSource = {"Happy Birthday!", "Happy Anniversary!", "Merry Christmas!", "Happy New Year!", "Thursday", "Friday", "Saturday","Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+    private ListView l;
+    private ArrayList<String> dataSource = new ArrayList<>();
+    private String[] defaultList = {"Hey, what's up?", "I'm on my way", "Good morning!", "Goodnight!", "Where are you?", "What are you up to?"};
+    ArrayAdapter<String> adapter;
 
     /** Called when the activity is first created. */
     @TargetApi(Build.VERSION_CODES.M)
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.layout);
 
         l = (ListView) findViewById(R.id.listView);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, dataSource);
+        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, dataSource);
         l.setAdapter(adapter);
         l.setOnItemClickListener(this);
+
+        for(int i=0;i<defaultList.length;i++) {
+            dataSource.add(defaultList[i]);
+        }
+
 
         EditText editText = (EditText) findViewById(R.id.editText);
         editText.setHint("Type a message");
         EditText editSmsRecipient = (EditText) findViewById(R.id.editSmsRecipient);
         editSmsRecipient.setText("6023451108");
+
+        ImageButton addBtn = (ImageButton) findViewById(R.id.btn_addMsg);
+        addBtn.setOnClickListener(new View.OnClickListener(){
+            @Override public void onClick(View view) {
+                int len = MainActivity.this.dataSource.size();
+                //MainActivity.this.dataSource[MainActivity.this.dataSource.length]="ADDED THIS NEW GUY";
+                dataSource.add("Ryan");
+                adapter.notifyDataSetChanged();
+                Toast.makeText(MainActivity.this, "Added value at pos: "+String.valueOf(len), Toast.LENGTH_SHORT).show();
+            }
+        });
 
         //check if we have permission
             //if no, prompt permission - no
@@ -184,7 +205,14 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         TextView temp = (TextView) view;
+        EditText smsText = (EditText) findViewById(R.id.editText);
+        smsText.setText(temp.getText().toString());
         Toast.makeText(this,temp.getText().toString()+" "+position,Toast.LENGTH_SHORT).show();
+
         // /Toast.makeText(this,temp.getText(),Toast.LENGTH_SHORT).show();
+    }
+    public ArrayAdapter<String> addMessageItem(ArrayAdapter<String> adapterArr, String newItem){
+        adapterArr.add(newItem);
+        return adapterArr;
     }
 }
