@@ -5,6 +5,7 @@ package com.rtmillerprojects.taptexter.ui;
  */
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.app.FragmentManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -14,6 +15,7 @@ import android.os.Bundle;
 import android.app.Activity;
 import android.provider.ContactsContract;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
 import android.telephony.SmsManager;
 import android.util.Log;
@@ -62,13 +64,14 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
         EditText editSmsRecipient = (EditText) findViewById(R.id.editSmsRecipient);
         editSmsRecipient.setText("6023451108");
 
-        ImageButton addBtn = (ImageButton) findViewById(R.id.btn_addMsg);
+        final ImageButton addBtn = (ImageButton) findViewById(R.id.btn_addMsg);
         addBtn.setOnClickListener(new View.OnClickListener(){
             @Override public void onClick(View view) {
                 int len = MainActivity.this.dataSource.size();
                 //MainActivity.this.dataSource[MainActivity.this.dataSource.length]="ADDED THIS NEW GUY";
                 dataSource.add("Ryan");
                 adapter.notifyDataSetChanged();
+                showDialog(addBtn);
                 Toast.makeText(MainActivity.this, "Added value at pos: "+String.valueOf(len), Toast.LENGTH_SHORT).show();
             }
         });
@@ -214,5 +217,10 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
     public ArrayAdapter<String> addMessageItem(ArrayAdapter<String> adapterArr, String newItem){
         adapterArr.add(newItem);
         return adapterArr;
+    }
+    public void showDialog(View v){
+        FragmentManager manager = getFragmentManager();
+        FragmentDialog addDialog = new FragmentDialog();
+        addDialog.show(manager, "addDialog");
     }
 }
