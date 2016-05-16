@@ -29,6 +29,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.rtmillerprojects.taptexter.R;
+import com.rtmillerprojects.taptexter.model.DatabaseHelper;
 
 import java.util.ArrayList;
 
@@ -39,7 +40,8 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
     private ListView l;
     private ArrayList<String> dataSource = new ArrayList<>();
     private String[] defaultList = {"Hey, what's up?", "I'm on my way", "Good morning!", "Goodnight!", "Where are you?", "What are you up to?"};
-    ArrayAdapter<String> adapter;
+    private ArrayAdapter<String> adapter;
+    private DatabaseHelper tapTexterDb;
 
     /** Called when the activity is first created. */
     @TargetApi(Build.VERSION_CODES.M)
@@ -48,10 +50,22 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
         super.onCreate(savedInstanceState);
         setContentView(R.layout.layout);
 
+        tapTexterDb = new DatabaseHelper(this);
         l = (ListView) findViewById(R.id.listView);
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, dataSource);
         l.setAdapter(adapter);
         l.setOnItemClickListener(this);
+        l.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                ArrayAdapter adapter = (ArrayAdapter)l.getAdapter();
+                String deletedItem = dataSource.get(position);
+                dataSource.remove(position); // you need to implement this method
+                adapter.notifyDataSetChanged();
+                Toast.makeText(MainActivity.this,"You've just deleted: "+deletedItem,Toast.LENGTH_SHORT).show();
+                return false;
+            }
+        });
 
         for(int i=0;i<defaultList.length;i++) {
             dataSource.add(defaultList[i]);
@@ -67,11 +81,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
         addBtn.setOnClickListener(new View.OnClickListener(){
             @Override public void onClick(View view) {
                 int len = MainActivity.this.dataSource.size();
-                //MainActivity.this.dataSource[MainActivity.this.dataSource.length]="ADDED THIS NEW GUY";
-                dataSource.add("Ryan");
-                adapter.notifyDataSetChanged();
                 showDialog(addBtn);
-                Toast.makeText(MainActivity.this, "Added value at pos: "+String.valueOf(len), Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -81,8 +91,6 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
             ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.READ_CONTACTS},MY_PERMISSIONS_REQUEST_READ_CONTACTS);
         }
 
-
-        String myText = editText.getText().toString();
         Button send = (Button) findViewById(R.id.btn_send);
         final Context _this = this;
         send.setOnClickListener(new View.OnClickListener() {
@@ -100,7 +108,9 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
                 }
             }
         });
+
     }
+
     // method to get name, contact id, and birthday
     private Cursor getContactsBirthdays() {
         Uri uri = ContactsContract.Data.CONTENT_URI;
@@ -209,14 +219,8 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
         TextView temp = (TextView) view;
         EditText smsText = (EditText) findViewById(R.id.editText);
         smsText.setText(temp.getText().toString());
-        Toast.makeText(this,temp.getText().toString()+" "+position,Toast.LENGTH_SHORT).show();
+    }
 
-        // /Toast.makeText(this,temp.getText(),Toast.LENGTH_SHORT).show();
-    }
-    public ArrayAdapter<String> addMessageItem(ArrayAdapter<String> adapterArr, String newItem){
-        adapterArr.add(newItem);
-        return adapterArr;
-    }
     public void showDialog(View v){
         FragmentManager manager = getFragmentManager();
         FragmentDialog addDialog = new FragmentDialog();
@@ -225,6 +229,8 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
 
     @Override
     public void onDialogMessage(String message) {
-        Toast.makeText(this,message,Toast.LENGTH_SHORT).show();
+        dataSource.add(message);
+        adapter.notifyDataSetChanged();
+        Toast.makeText(this,"New message has been added",Toast.LENGTH_SHORT).show();
     }
 }

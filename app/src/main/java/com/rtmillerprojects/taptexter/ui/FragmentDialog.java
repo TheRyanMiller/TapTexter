@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 
 import com.rtmillerprojects.taptexter.R;
 
@@ -17,6 +18,7 @@ import com.rtmillerprojects.taptexter.R;
 public class FragmentDialog extends DialogFragment implements View.OnClickListener{
 
     Button add, cancel;
+    EditText text;
     Communicator cm;
 
     @Override
@@ -28,6 +30,7 @@ public class FragmentDialog extends DialogFragment implements View.OnClickListen
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.frag_dialogadd, null);
+        text = (EditText) view.findViewById(R.id.addedItem);
         add = (Button) view.findViewById(R.id.btn_add);
         cancel = (Button) view.findViewById(R.id.btn_cancel);
         add.setOnClickListener(this);
@@ -39,11 +42,10 @@ public class FragmentDialog extends DialogFragment implements View.OnClickListen
     @Override
     public void onClick(View v) {
         if(v.getId() == R.id.btn_add){
-            cm.onDialogMessage("Add was clicked");
+            cm.onDialogMessage(text.getText().toString());
             dismiss();
         }
         if(v.getId() == R.id.btn_cancel){
-            cm.onDialogMessage("Cancel was clicked");
             dismiss();
         }
         dismiss();

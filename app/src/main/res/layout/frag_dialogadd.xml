@@ -7,8 +7,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Large Text"
-        android:id="@+id/textView" />
+        android:text=""
+        android:hint="Enter text here"
+        android:id="@+id/addedItem" />
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
