@@ -15,7 +15,6 @@ import android.os.Bundle;
 import android.app.Activity;
 import android.provider.ContactsContract;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
 import android.telephony.SmsManager;
 import android.util.Log;
@@ -33,7 +32,7 @@ import com.rtmillerprojects.taptexter.R;
 
 import java.util.ArrayList;
 
-public class MainActivity extends Activity implements AdapterView.OnItemClickListener{
+public class MainActivity extends Activity implements AdapterView.OnItemClickListener, FragmentDialog.Communicator{
 
     private static final int MY_PERMISSIONS_REQUEST_SEND_SMS = 1;
     private static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 2;
@@ -222,5 +221,10 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
         FragmentManager manager = getFragmentManager();
         FragmentDialog addDialog = new FragmentDialog();
         addDialog.show(manager, "addDialog");
+    }
+
+    @Override
+    public void onDialogMessage(String message) {
+        Toast.makeText(this,message,Toast.LENGTH_SHORT).show();
     }
 }
