@@ -7,35 +7,46 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_height="80dp"
         android:divider="#080808"
         android:contextClickable="true">
 
 
+        <ImageButton
+            android:layout_marginTop="45dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:id="@+id/btn_addMsg"
+            android:src="@android:drawable/ic_input_add" />
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:gravity="center"
+            android:layout_height="50dp"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="@string/label_recipient"
+            android:id="@+id/textView" />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:inputType="number"
+            android:id="@+id/editSmsRecipient"
+            android:layout_toRightOf="@+id/textView"
+            android:layout_toEndOf="@+id/textView" />
+
     </LinearLayout>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:gravity="center"
-                android:layout_height="60dp"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:text="@string/label_recipient"
-                android:id="@+id/textView" />
+    <ListView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="80dp"
+        android:layout_marginBottom="120dp"
+        android:id="@+id/listView"
+        android:backgroundTint="#d9d9d9"
+        android:background="#d9d9d9" />
 
-            <EditText
-                android:layout_width="match_parent"
-                android:layout_height="60dp"
-                android:layout_marginLeft="100dp"
-                android:id="@+id/editSmsRecipient" />
-
-            <ListView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="60dp"
-                android:layout_marginBottom="120dp"
-                android:id="@+id/listView"
-                android:backgroundTint="#d9d9d9"
-                android:background="#d9d9d9" />
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="120dp"
@@ -63,14 +74,7 @@
 
     </LinearLayout>
 
-    <ImageButton
-        android:layout_width="45dp"
-        android:layout_height="42dp"
-        android:id="@+id/btn_addMsg"
-        android:src="@android:drawable/ic_input_add"
-        android:layout_alignTop="@+id/listView"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+
 
 
 </RelativeLayout>

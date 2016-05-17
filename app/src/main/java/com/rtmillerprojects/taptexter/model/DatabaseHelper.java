@@ -1,6 +1,8 @@
 package com.rtmillerprojects.taptexter.model;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
@@ -27,5 +29,29 @@ public class DatabaseHelper extends SQLiteOpenHelper{
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE  IF EXISTS "+TABLE_NAME);
+    }
+
+    public boolean insertData(String message){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(COL_2,message);
+        long result = db.insert(TABLE_NAME,null,contentValues);
+        if(result == -1){
+            return false;
+        }
+        else{
+            return true;
+        }
+    }
+
+    public Cursor getData(){
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor result = db.rawQuery("SELECT * FROM "+TABLE_NAME,null);
+        return result;
+    }
+    public boolean deleteData(String message){
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_NAME,"message=?",new String[] {message});
+        return true;
     }
 }

@@ -46,7 +46,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
     /** Called when the activity is first created. */
     @TargetApi(Build.VERSION_CODES.M)
     @Override
-    public void onCreate(final Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.layout);
 
@@ -62,101 +62,63 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
                 String deletedItem = dataSource.get(position);
                 dataSource.remove(position); // you need to implement this method
                 adapter.notifyDataSetChanged();
-                Toast.makeText(MainActivity.this,"You've just deleted: "+deletedItem,Toast.LENGTH_SHORT).show();
+                boolean success = tapTexterDb.deleteData(deletedItem);
+                Toast.makeText(MainActivity.this,"You have successfully deleted: "+deletedItem,Toast.LENGTH_SHORT).show();
                 return false;
             }
         });
 
-        for(int i=0;i<defaultList.length;i++) {
-            dataSource.add(defaultList[i]);
+        Cursor res = tapTexterDb.getData();
+        if(res.getCount()==0){
+            for(int i=0;i<defaultList.length;i++){
+                dataSource.add(defaultList[i]);
+                boolean success = tapTexterDb.insertData(defaultList[i]);
+                //Toast.makeText(MainActivity.this,""+success,Toast.LENGTH_SHORT).show();
+            }
+            adapter.notifyDataSetChanged();
+        }
+        else{
+            //populate datasource
+            while(res.moveToNext()){
+                dataSource.add(res.getString(1));
+            }
         }
 
 
         EditText editText = (EditText) findViewById(R.id.editText);
         editText.setHint("Type a message");
-        EditText editSmsRecipient = (EditText) findViewById(R.id.editSmsRecipient);
-        editSmsRecipient.setText("6023451108");
+        //EditText editSmsRecipient = (EditText) findViewById(R.id.editSmsRecipient);
+        //editSmsRecipient.setText("6023451108");
 
-        final ImageButton addBtn = (ImageButton) findViewById(R.id.btn_addMsg);
+        ImageButton addBtn = (ImageButton) findViewById(R.id.btn_addMsg);
         addBtn.setOnClickListener(new View.OnClickListener(){
             @Override public void onClick(View view) {
-                int len = MainActivity.this.dataSource.size();
-                showDialog(addBtn);
+                showDialog(view);
             }
         });
-
-        //check if we have permission
-            //if no, prompt permission - no
-        if(ContextCompat.checkSelfPermission(this,Manifest.permission.READ_CONTACTS)!= PackageManager.PERMISSION_GRANTED ) {
-            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.READ_CONTACTS},MY_PERMISSIONS_REQUEST_READ_CONTACTS);
-        }
 
         Button send = (Button) findViewById(R.id.btn_send);
-        final Context _this = this;
         send.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View view) {
-                if (ContextCompat.checkSelfPermission(_this,Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED){
-                    ActivityCompat.requestPermissions((Activity) _this,new String[]{Manifest.permission.SEND_SMS},MY_PERMISSIONS_REQUEST_SEND_SMS);
-                }
+                boolean success;
                 String msg = ((EditText) findViewById(R.id.editText)).getText().toString();
-                String smsRecipient = ((EditText) findViewById(R.id.editSmsRecipient)).getText().toString();;
-                if(msg.length()>0) {
-                    boolean smsSuccess = iHavePermissions(msg, smsRecipient, _this);
-                    if(smsSuccess){((EditText) findViewById(R.id.editText)).setText("");}
-                }else{
-                    Toast.makeText(_this,"Need to enter text before you can send",Toast.LENGTH_SHORT).show();
+                String smsRecipient = ((EditText) findViewById(R.id.editSmsRecipient)).getText().toString();
+                if (ContextCompat.checkSelfPermission(MainActivity.this,Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED){
+                    ActivityCompat.requestPermissions(MainActivity.this,new String[]{Manifest.permission.SEND_SMS},MY_PERMISSIONS_REQUEST_SEND_SMS);
+
                 }
+                else{
+                    success = sendSms(msg, smsRecipient);
+                    if(success==false) {
+                        Toast.makeText(MainActivity.this,"Need to enter a valid ph# & text before you can send",Toast.LENGTH_SHORT).show();
+                    }
+                    else {
+                        ((EditText) findViewById(R.id.editText)).setText("");
+                    }
+                }
+
             }
         });
-
-    }
-
-    // method to get name, contact id, and birthday
-    private Cursor getContactsBirthdays() {
-        Uri uri = ContactsContract.Data.CONTENT_URI;
-
-        String[] projection = new String[] {
-                ContactsContract.Contacts.DISPLAY_NAME,
-                ContactsContract.CommonDataKinds.Event.CONTACT_ID,
-                ContactsContract.CommonDataKinds.Event.START_DATE
-        };
-
-        String where =
-                ContactsContract.Data.MIMETYPE + "= ? AND " +
-                        ContactsContract.CommonDataKinds.Event.TYPE + "=" +
-                        ContactsContract.CommonDataKinds.Event.TYPE_BIRTHDAY;
-        String[] selectionArgs = new String[] {
-                ContactsContract.CommonDataKinds.Event.CONTENT_ITEM_TYPE
-        };
-        String sortOrder = null;
-        return managedQuery(uri, projection, where, selectionArgs, sortOrder);
-    }
-
-    private boolean iHavePermissions(String msgText, String smsRecipient, Context context){
-        String smsBody = msgText;
-        SmsManager smsManager = SmsManager.getDefault();
-        // Send a text based SMS
-
-        // iterate through all Contact's Birthdays and print in log
-        Cursor cursor = getContactsBirthdays();
-        int bDayColumn = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Event.START_DATE);
-        int phoneName = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
-        int phoneNumber = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
-        while (cursor.moveToNext()) {
-            String bDay = cursor.getString(bDayColumn);
-            Log.d("MYTAG!", "Birthday: " + bDay);
-            Log.d("MYTAG!", "Name: " + phoneName);
-            Log.d("MYTAG!", "Number: " + phoneNumber);
-        }
-        try{
-            smsManager.sendTextMessage(smsRecipient, null, smsBody, null, null);
-            Toast.makeText(context,"Message has been sent",Toast.LENGTH_SHORT).show();
-            return true;
-        }
-        catch(Error err){
-            return false;
-        }
-
     }
 
     @Override
@@ -166,18 +128,19 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(MainActivity.this,"Permissions are now obtained - try your message again",Toast.LENGTH_SHORT).show();
                     return;
                 } else {
-
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
-                    Log.d("MYTAG!", "Birthday: NONE");
+
                 }
             }
             case MY_PERMISSIONS_REQUEST_READ_CONTACTS: {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(MainActivity.this,"Contacts permissions are now obtained",Toast.LENGTH_SHORT).show();
                     return;
                 }
             }
@@ -231,6 +194,25 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
     public void onDialogMessage(String message) {
         dataSource.add(message);
         adapter.notifyDataSetChanged();
-        Toast.makeText(this,"New message has been added",Toast.LENGTH_SHORT).show();
+        boolean success = tapTexterDb.insertData(message);
+        Toast.makeText(this,"New message has been added.",Toast.LENGTH_SHORT).show();
+    }
+    public boolean sendSms(String msg, String number){
+        if(msg.length()<1 || number.length()<8){
+            return false;
+        }
+        else{
+            String smsBody = msg;
+            SmsManager smsManager = SmsManager.getDefault();
+            try{
+                smsManager.sendTextMessage(number, null, smsBody, null, null);
+                Toast.makeText(MainActivity.this,"Message has been sent",Toast.LENGTH_SHORT).show();
+                return true;
+            }
+            catch(Error err){
+                return false;
+            }
+
+        }
     }
 }
