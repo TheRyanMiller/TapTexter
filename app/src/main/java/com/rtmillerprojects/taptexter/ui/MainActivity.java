@@ -7,6 +7,7 @@ import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.FragmentManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
@@ -37,6 +38,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
 
     private static final int MY_PERMISSIONS_REQUEST_SEND_SMS = 1;
     private static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 2;
+    private static final int RESULT_PICK_CONTACT = 100;
     private ListView l;
     private ArrayList<String> dataSource = new ArrayList<>();
     private String[] defaultList = {"Hey, what's up?", "I'm on my way", "Good morning!", "Goodnight!", "Where are you?", "What are you up to?"};
@@ -96,6 +98,16 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
                 showDialog(view);
             }
         });
+
+        ImageButton pickContact = (ImageButton) findViewById(R.id.btn_pickContact);
+        pickContact.setOnClickListener(new View.OnClickListener(){
+            @Override public void onClick(View view) {
+                Intent in = new Intent(Intent.ACTION_PICK,ContactsContract.CommonDataKinds.Phone.CONTENT_URI);
+                startActivityForResult(in,RESULT_PICK_CONTACT);
+
+            }
+        });
+
 
         Button send = (Button) findViewById(R.id.btn_send);
         send.setOnClickListener(new View.OnClickListener() {
@@ -196,6 +208,44 @@ public class MainActivity extends Activity implements AdapterView.OnItemClickLis
         adapter.notifyDataSetChanged();
         boolean success = tapTexterDb.insertData(message);
         Toast.makeText(this,"New message has been added.",Toast.LENGTH_SHORT).show();
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // check whether the result is ok
+        if (resultCode == RESULT_OK) {
+            // Check for the request code, we might be usign multiple startActivityForReslut
+            switch (requestCode) {
+                case RESULT_PICK_CONTACT:
+                    contactPicked(data);
+                    break;
+            }
+        } else {
+            Log.e("MainActivity", "Failed to pick contact");
+        }
+    }
+    private void contactPicked(Intent data) {
+        Cursor cursor = null;
+        try {
+            String phoneNo = null ;
+            String name = null;
+            // getData() method will have the Content Uri of the selected contact
+            Uri uri = data.getData();
+            //Query the content uri
+            cursor = getContentResolver().query(uri, null, null, null, null);
+            cursor.moveToFirst();
+            // column index of the phone number
+            int  phoneIndex =cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+            // column index of the contact name
+            int  nameIndex =cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
+            phoneNo = cursor.getString(phoneIndex);
+            name = cursor.getString(nameIndex);
+            // Set the value to the textviews
+            EditText smsRecipient = (EditText) findViewById(R.id.editSmsRecipient);
+            smsRecipient.setText(phoneNo);
+            //textView2.setText(name);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
     public boolean sendSms(String msg, String number){
         if(msg.length()<1 || number.length()<8){

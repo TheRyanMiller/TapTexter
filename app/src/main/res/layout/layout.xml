@@ -9,35 +9,41 @@
         android:layout_width="match_parent"
         android:layout_height="80dp"
         android:divider="#080808"
-        android:contextClickable="true">
-
-
-        <ImageButton
-            android:layout_marginTop="45dp"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:id="@+id/btn_addMsg"
-            android:src="@android:drawable/ic_input_add" />
+        android:orientation="horizontal"
+        android:contextClickable="true"
+        android:id="@+id/linearLayout">
 
 
         <TextView
             android:layout_width="wrap_content"
             android:gravity="center"
             android:layout_height="50dp"
+            android:layout_marginLeft="65dp"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:text="@string/label_recipient"
             android:id="@+id/textView" />
 
         <EditText
-            android:layout_width="match_parent"
+            android:layout_width="129dp"
             android:layout_height="50dp"
             android:inputType="number"
             android:id="@+id/editSmsRecipient"
             android:layout_toRightOf="@+id/textView"
             android:layout_toEndOf="@+id/textView" />
 
-    </LinearLayout>
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/btn_pickContact"
+            android:src="@android:drawable/sym_contact_card" />
 
+    </LinearLayout>
+    <ImageButton
+        android:layout_marginTop="45dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:id="@+id/btn_addMsg"
+        android:src="@android:drawable/ic_input_add" />
     <ListView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
